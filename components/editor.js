@@ -3,6 +3,7 @@ import {spawn} from "child_process";
 import tmp from "tmp";
 import fs from "fs";
 import path from "path";
+import {remote} from 'electron';
 
 var tex_options = ['--halt-on-error', '--interaction=nonstopmode']
 var dvipng_options = ['-D', '1200', '-T', 'tight', '-o', 'formula.png']
@@ -11,6 +12,9 @@ var latex_template = {
   after: "\\end{align*}\\end{document}"
 }
 var last_cleanup;
+remote.getCurrentWindow().on('close', () => {
+  if (typeof last_cleanup !== 'undefined') last_cleanup();
+})
 
 export default class Editor extends React.Component {
   constructor(props) {
