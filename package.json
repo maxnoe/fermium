@@ -1,0 +1,11 @@
+{
+  "name": "fermium",
+  "version": "0.0.1",
+  "license": "MIT",
+  "description": "Utility to create drag-n-droppable pngs from LaTeX-code, inspired by LaTeXit",
+  "repository": "http://github.com/maxnoe/fermium",
+  "main": "main.js",
+  "dependencies": {
+    "react": "^15.4.0"
+  }
+}
