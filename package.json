@@ -6,9 +6,10 @@
   "repository": "http://github.com/maxnoe/fermium",
   "main": "main.js",
   "dependencies": {
+    "babel-core": "^6.3.13",
     "react": "^15.4.0",
     "react-dom": "^15.4.0",
-    "babel-core": "^6.3.13"
+    "tmp": "0.0.30"
   },
   "devDependencies": {
     "babel-loader": "^6.2.8",

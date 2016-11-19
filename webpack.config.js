@@ -1,6 +1,7 @@
 var webpack = require('webpack');
 
 module.exports = {
+  target: 'electron',
   context: __dirname + '/src',
   entry: './entry.js',
 
