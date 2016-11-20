@@ -3,7 +3,7 @@ import {spawn} from "child_process";
 import tmp from "tmp";
 import fs from "fs";
 import path from "path";
-import {remote} from 'electron';
+import {remote, ipcRenderer} from 'electron';
 
 var tex_options = ['--halt-on-error', '--interaction=nonstopmode']
 var dvipng_options = ['-D', '1200', '-T', 'tight', '-o', 'formula.png']
@@ -34,10 +34,17 @@ export default class Editor extends React.Component {
           </form>
         </div>
         <div>
-          <img src={this.state.image} alt="" style={{maxWidth: '100%', maxHeight: '100%'}}/>
+          <a href="#" id="drag" onDragStart={this.handleDrag.bind(this)}>
+            <img src={this.state.image} alt="" style={{maxWidth: '100%', maxHeight: '100%'}}/>
+          </a>
         </div>
       </div>
     );
+  }
+
+  handleDrag(event){
+    event.preventDefault();
+    ipcRenderer.send('ondragstart', this.state.image);
   }
 
   handleChange(event) {

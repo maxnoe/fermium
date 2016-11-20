@@ -5,6 +5,7 @@ const url = require('url')
 const BrowserWindow = electron.BrowserWindow
 const Menu = electron.Menu
 const app = electron.app
+const ipcMain = electron.ipcMain
 
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -31,6 +32,16 @@ function createWindow () {
 
   win.setMenu(null)
   win.openDevTools()
+
+  win.on('dragover', function (event) {
+    event.preventDefault();
+    return false;
+  }, false);
+
+  win.on('drop', function (event) {
+    event.preventDefault();
+    return false;
+  }, false);
 }
 
 // This method will be called when Electron has finished
@@ -53,4 +64,11 @@ app.on('activate', () => {
   if (win === null) {
     createWindow()
   }
+})
+
+ipcMain.on('ondragstart', (event, filePath) => {
+  event.sender.startDrag({
+    file: filePath,
+    icon: filePath
+  })
 })
