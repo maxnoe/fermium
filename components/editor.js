@@ -1,7 +1,7 @@
 import React from "react";
-import {spawn} from "child_process";
-import tmp from "tmp";
-import fs from "fs";
+import {spawn} from "child-process-promise";
+import tmp from "tmp-promise";
+import write from "fs-writefile-promise";
 import path from "path";
 import {remote, ipcRenderer} from 'electron';
 
@@ -11,10 +11,7 @@ var latex_template = {
   before : "\\documentclass{scrartcl}\\pagestyle{empty}\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\n\\usepackage{mathtools}\\usepackage{lmodern}\\begin{document}\\begin{align*}",
   after: "\\end{align*}\\end{document}"
 }
-var last_cleanup;
-remote.getCurrentWindow().on('close', () => {
-  if (typeof last_cleanup !== 'undefined') last_cleanup();
-})
+
 
 export default class Editor extends React.Component {
   constructor(props) {
@@ -24,6 +21,13 @@ export default class Editor extends React.Component {
       formula: "a^2 + b^2 = c^2"
     };
   }
+  
+  componentWillUnmount(){
+    if (typeof this.state.currentCleanupCallback !== 'undefined') {
+      this.state.currentCleanupCallback();
+    }
+  }
+
 
   render() {
     return (
@@ -56,40 +60,32 @@ export default class Editor extends React.Component {
 
   doneTyping() {
     console.log(this.state.formula);
-    this.call_latex(this.state.formula);
+    this.run_latex();
   }
 
-  call_latex(formula){
-    tmp.dir({unsafeCleanup: true}, (err, tmpdir, cleanupCallback) => {
-      if (err) throw err;
-      if (typeof last_cleanup !== 'undefined') last_cleanup();
-      last_cleanup = cleanupCallback;
-      console.log("Created tmp dir: ", tmpdir);
-
-      var texfile = path.join(tmpdir, "formula.tex");
-      var dvifile = texfile.replace('.tex', '.dvi');
-      fs.writeFile(
-        texfile,
-        latex_template.before + formula + latex_template.after,
-        (err) => {
-          if (err) throw err;
-          console.log("texfile written");
-          var tex = spawn("latex", tex_options.concat([texfile]), {cwd: tmpdir});
-          tex.stdout.on("data", (data) => {console.log(data.toString());});
-          tex.stderr.on("data", (data) => {console.log(data.toString());});
-          tex.on("exit", (err) => {
-            console.log("latex done");
-            var dvipng = spawn("dvipng", dvipng_options.concat([dvifile]), {cwd: tmpdir});
-            dvipng.stdout.on("data", (data) => {console.log(data.toString());});
-            dvipng.stderr.on("data", (data) => {console.log(data.toString());});
-            dvipng.on("exit", (err) => {
-              if (err) throw err;
-              console.log("dvipng done");
-              this.setState({image: dvifile.replace('.dvi', '.png')});
-            });
-          });
-        }
-      );
-    });
+  run_latex() {
+    tmp.dir()
+    .then((dir) => {
+      console.log(dir.path);
+      this.state.directory = dir.path;
+      var texfile = path.join(dir.path, 'formula.tex');
+      var texcode = latex_template.before + this.state.formula + latex_template.after;
+      return write(texfile, texcode);
+    })
+    .then((texfile) => {
+      console.log(texfile);
+      return spawn('latex', tex_options.concat([texfile]), {cwd: this.state.directory});
+    })
+    .then(() => {
+      var dvifile = path.join(this.state.directory, 'formula.dvi');
+      console.log(dvifile);
+      return spawn("dvipng", dvipng_options.concat([dvifile]), {cwd: this.state.directory});
+    })
+    .then(() => {
+      console.log("Updated image path");
+      this.setState({image: path.join(this.state.directory, 'formula.png')});
+    })
+    .catch((err) => console.log('ERROR: ', err))
   }
+
 }
