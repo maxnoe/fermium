@@ -40,6 +40,7 @@ export default class Editor extends React.Component {
       this.state.editor.getSession().setMode('ace/mode/latex');
       this.state.editor.setTheme('ace/theme/monokai');
       this.state.editor.on('change', this.handleChange.bind(this));
+      this.state.editor.renderer.setScrollMargin(5, 5, 5, 5);
     });
   }
   
