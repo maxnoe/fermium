@@ -30,15 +30,15 @@ export default class Editor extends React.Component {
   
   render() {
     return (
-      <div>
-        <div>
-          <form>
-            <textarea className="editor" value={this.state.formula} onChange={this.handleChange.bind(this)}/>
+      <div className="app">
+        <div className="editor">
+          <form >
+            <textarea value={this.state.formula} onChange={this.handleChange.bind(this)}/>
           </form>
         </div>
-        <div>
-          <a href="#" className="preview" id="drag" onDragStart={this.handleDrag.bind(this)}>
-            <img src={this.state.image} alt="" style={{maxWidth: '100%', maxHeight: '100%'}}/>
+        <div className="preview">
+          <a href="#" id="drag" onDragStart={this.handleDrag.bind(this)}>
+            <img src={this.state.image} alt="" />
           </a>
         </div>
       </div>
