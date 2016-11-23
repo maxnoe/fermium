@@ -12,6 +12,11 @@ var latex_template = {
   after: "\\end{align*}\\end{document}"
 }
 
+var cleanup;
+remote.getCurrentWindow().on('close', () => {
+  if (typeof cleanup !== 'undefined') cleanup();
+})
+
 
 export default class Editor extends React.Component {
   constructor(props) {
@@ -20,25 +25,19 @@ export default class Editor extends React.Component {
       typingTimeout: 2000,
       formula: "a^2 + b^2 = c^2"
     };
+    this.runLaTeX();
   }
   
-  componentWillUnmount(){
-    if (typeof this.state.currentCleanupCallback !== 'undefined') {
-      this.state.currentCleanupCallback();
-    }
-  }
-
-
   render() {
     return (
       <div>
         <div>
           <form>
-            <textarea value={this.state.formula} onChange={this.handleChange.bind(this)}/>
+            <textarea className="editor" value={this.state.formula} onChange={this.handleChange.bind(this)}/>
           </form>
         </div>
         <div>
-          <a href="#" id="drag" onDragStart={this.handleDrag.bind(this)}>
+          <a href="#" className="preview" id="drag" onDragStart={this.handleDrag.bind(this)}>
             <img src={this.state.image} alt="" style={{maxWidth: '100%', maxHeight: '100%'}}/>
           </a>
         </div>
@@ -60,16 +59,20 @@ export default class Editor extends React.Component {
 
   doneTyping() {
     console.log(this.state.formula);
-    this.run_latex();
+    this.runLaTeX();
   }
 
-  run_latex() {
-    tmp.dir()
+  runLaTeX() {
+    tmp.dir({unsafeCleanup: true})
     .then((dir) => {
       console.log(dir.path);
       this.state.directory = dir.path;
       var texfile = path.join(dir.path, 'formula.tex');
       var texcode = latex_template.before + this.state.formula + latex_template.after;
+      if (typeof cleanup !== 'undefined'){
+        cleanup();
+      }
+      cleanup = dir.cleanup;
       return write(texfile, texcode);
     })
     .then((texfile) => {
