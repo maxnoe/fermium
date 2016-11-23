@@ -6,12 +6,13 @@
   "repository": "http://github.com/maxnoe/fermium",
   "main": "main.js",
   "dependencies": {
+    "brace": "^0.9.0",
     "child-process-promise": "^2.2.0",
     "fs-writefile-promise": "^2.0.0",
-    "tmp-promise": "^1.0.2",
     "npm": "^4.0.2",
     "react": "^15.4.0",
-    "react-dom": "^15.4.0"
+    "react-dom": "^15.4.0",
+    "tmp-promise": "^1.0.2"
   },
   "devDependencies": {
     "babel-loader": "^6.2.8",

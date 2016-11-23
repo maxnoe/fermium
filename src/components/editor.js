@@ -5,6 +5,12 @@ import write from "fs-writefile-promise";
 import path from "path";
 import {remote, ipcRenderer} from 'electron';
 
+import ace from 'brace';
+
+require('brace/mode/latex');
+require('brace/theme/monokai');
+
+
 var tex_options = ['--halt-on-error', '--interaction=nonstopmode']
 var dvipng_options = ['-D', '1200', '-T', 'tight', '-o', 'formula.png']
 var latex_template = {
@@ -27,15 +33,20 @@ export default class Editor extends React.Component {
     };
     this.runLaTeX();
   }
+
+  componentDidMount() {
+    this.setState({editor: ace.edit("editor")}, () => {
+      console.log(this.state);
+      this.state.editor.getSession().setMode('ace/mode/latex');
+      this.state.editor.setTheme('ace/theme/monokai');
+      this.state.editor.on('change', this.handleChange.bind(this));
+    });
+  }
   
   render() {
     return (
       <div className="app">
-        <div className="editor">
-          <form >
-            <textarea value={this.state.formula} onChange={this.handleChange.bind(this)}/>
-          </form>
-        </div>
+        <div className="editor" id="editor"></div>
         <div className="preview">
           <a href="#" id="drag" onDragStart={this.handleDrag.bind(this)}>
             <img src={this.state.image} alt="" />
@@ -51,7 +62,7 @@ export default class Editor extends React.Component {
   }
 
   handleChange(event) {
-    this.setState({formula: event.target.value});
+    this.setState({formula: this.state.editor.getValue()});
     clearTimeout(this.state.typingTimer);
     this.state.typingTimer = setTimeout(this.doneTyping.bind(this), this.state.typingTimeout);
     console.log("Change");
